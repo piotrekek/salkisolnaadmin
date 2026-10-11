@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     
+    <!-- TAGI PWA DLA SMARTFONÓW -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Admin POSM">
@@ -38,6 +39,7 @@
         .ukryty { opacity: 0; pointer-events: none; position: absolute; transform: scale(0.98); z-index: -1; }
         .widoczny { opacity: 1; transform: scale(1); position: relative; z-index: 10; }
         .no-scrollbar::-webkit-scrollbar { display: none; } .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .modal-overlay { background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(4px); }
         
         .btn-wykres { background: rgba(255,255,255,0.05); padding: 4px 12px; border-radius: 8px; transition: all 0.2s; }
         .btn-wykres:hover { background: rgba(255,255,255,0.15); transform: scale(1.05); }
@@ -49,8 +51,9 @@
         .date-input:focus { border-color: #6366f1; }
         
         #pdf-template { background: white; color: black; width: 800px; padding: 40px; position: absolute; top: -9999px; left: -9999px; z-index: -9999; }
-        .pdf-title { font-size: 24px; font-weight: bold; border-bottom: 2px solid black; padding-bottom: 10px; margin-bottom: 20px; text-align: center; }
-        .pdf-subtitle { font-size: 14px; color: #555; margin-bottom: 30px; text-align: center; line-height: 1.6; }
+        /* Nagłówki PDF przesunięte do lewej, a nie na środku[cite: 12] */
+        .pdf-title { font-size: 24px; font-weight: bold; border-bottom: 2px solid black; padding-bottom: 10px; margin-bottom: 20px; text-align: left; }
+        .pdf-subtitle { font-size: 14px; color: #555; margin-bottom: 30px; text-align: left; line-height: 1.6; }
         .pdf-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
         .pdf-table th, .pdf-table td { border: 1px solid #ccc; padding: 10px; text-align: left; }
         .pdf-table th { background-color: #f4f4f5; font-weight: bold; }
@@ -72,36 +75,44 @@
         </div>
     </div>
 
+    <!-- MODAL HISTORII SALI -->
+    <div id="modal-historia" class="fixed inset-0 modal-overlay hidden items-center justify-center z-50 p-4">
+        <div class="glass-panel p-6 w-full max-w-md relative flex flex-col max-h-[80vh]">
+            <button onclick="zamknijHistorieSali()" class="absolute top-4 right-4 text-zinc-400 hover:text-white text-3xl font-bold leading-none">&times;</button>
+            <h2 class="text-xl font-bold text-white mb-1">Historia Sali <span id="modal-sala-nr" class="text-indigo-400"></span></h2>
+            <p class="text-xs text-zinc-400 mb-4">Aktywność z dnia dzisiejszego</p>
+            <div id="modal-historia-lista" class="flex-grow overflow-y-auto pr-2 flex flex-col gap-2 no-scrollbar">
+                <!-- Logi z JS -->
+            </div>
+        </div>
+    </div>
+
     <!-- EKRAN DASHBOARDU -->
     <div id="ekran-dashboardu" class="ekran ukryty w-full max-w-[1400px] flex flex-col gap-4 sm:gap-5 pb-8">
         
         <nav class="glass-panel px-4 sm:px-6 py-3 sm:py-4 flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-0">
             <div class="flex w-full justify-between items-center sm:w-auto">
                 <div class="flex items-center gap-3">
-                    <div class="relative w-10 h-10 sm:w-16 sm:h-16 rounded-xl flex items-center justify-center overflow-hidden bg-white/5 border border-white/10">
+                    <div class="relative w-10 h-10 sm:w-16 sm:h-16 rounded-xl flex items-center justify-center overflow-hidden bg-white/5 border border-white/10 hidden sm:flex">
                         <img src="logo.png" alt="Logo" class="w-full h-full object-cover z-10" onerror="this.style.display='none'">
                     </div>
                     <div><h1 class="text-lg sm:text-xl font-bold tracking-tight">Centrum Dowodzenia</h1></div>
                 </div>
-                <!-- Przycisk wyloguj dla telefonów (ukryty na PC) -->
                 <button onclick="wyloguj()" class="sm:hidden text-zinc-400 hover:text-white bg-zinc-800/50 px-3 py-1.5 rounded-lg text-xs font-bold border border-zinc-700">Wyloguj</button>
             </div>
             
-            <!-- Zakładki przewijane na boki na telefonie -->
             <div class="flex gap-4 overflow-x-auto no-scrollbar w-full sm:w-auto pb-1 items-center">
                 <button onclick="zmienZakladke('statystyki')" id="btn-tab-statystyki" class="tab-btn active pb-1 text-xs sm:text-sm tracking-wide uppercase whitespace-nowrap shrink-0">Analityka i Wykresy</button>
                 <button onclick="zmienZakladke('podglad')" id="btn-tab-podglad" class="tab-btn pb-1 text-xs sm:text-sm tracking-wide uppercase whitespace-nowrap shrink-0">Stan Sal na Żywo</button>
                 <button onclick="zmienZakladke('narzedzia')" id="btn-tab-narzedzia" class="tab-btn pb-1 text-xs sm:text-sm tracking-wide uppercase text-indigo-400 whitespace-nowrap shrink-0">Narzędzia</button>
             </div>
 
-            <!-- Przycisk wyloguj dla PC -->
             <button onclick="wyloguj()" class="hidden sm:block text-zinc-400 hover:text-white bg-zinc-800/50 px-4 py-2 rounded-lg text-sm border border-zinc-700">Wyloguj</button>
         </nav>
 
         <!-- ZAKŁADKA 1: STATYSTYKI -->
         <div id="zakladka-statystyki" class="flex flex-col gap-4 sm:gap-5">
             
-            <!-- Filtry kalendarza -->
             <div class="glass-panel px-4 sm:px-6 py-3 flex items-center gap-3 overflow-x-auto no-scrollbar">
                 <span class="text-xs font-bold text-zinc-500 uppercase tracking-widest shrink-0">Okres:</span>
                 <button onclick="ustawTrybFiltru('all')" id="btn-all" class="filtr-btn active shrink-0">Cała historia</button>
@@ -237,8 +248,9 @@
 
     <!-- SZABLON PDF -->
     <div id="pdf-template">
-        <div style="position: relative; text-align: center; margin-bottom: 30px; padding-top: 10px;">
+        <div style="position: relative; margin-bottom: 30px; padding-top: 10px;">
             <img id="pdf-logo" src="logo.png" style="position: absolute; top: 0; right: 0; width: 80px; height: 80px; object-fit: contain;" crossorigin="anonymous">
+            <!-- Nagłówek po lewej[cite: 12] -->
             <div class="pdf-title">Raport Aktywności - Elektroniczna Portiernia POSM</div>
             <div class="pdf-subtitle">
                 Miesiąc rozliczeniowy: <span id="pdf-out-miesiac" style="font-weight:bold;">-</span><br>
@@ -300,7 +312,6 @@
         document.getElementById("pole-hasla").addEventListener("keypress", e => { if (e.key === "Enter") zaloguj(); });
 
         function zaloguj() {
-            // Logowanie na sztywno przypisanym e-mailem, dyrekcja wpisuje TYLKO hasło
             const email = "admin@posm.pl"; 
             const haslo = document.getElementById('pole-hasla').value;
             
@@ -322,7 +333,6 @@
             });
         }
 
-        // Firebase Auth pilnuje, by nikt nie ominął zabezpieczeń zbadaj elementem
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
                 document.getElementById('ekran-logowania').classList.replace('widoczny', 'ukryty');
@@ -344,7 +354,6 @@
             });
         }
 
-        // PANCERNA FUNKCJA DO PARSOWANIA CZASU (ROZWIĄZUJE BŁĄD "-" NA IPHONE/SAFARI)
         function parsowacCzas(czasStr) {
             const p = czasStr.split(/[- :]/);
             if(p.length === 6) return new Date(p[0], p[1]-1, p[2], p[3], p[4], p[5]).getTime();
@@ -360,8 +369,14 @@
                     odswiezWidokLive(); 
                 }
             });
-            db.ref('sale_aktualne').on('value', snap => { if(snap.val()) { statusySal = snap.val(); odswiezWidokLive(); } });
-            setInterval(aktualizujLicznikiCzasu, 60000);
+            db.ref('sale_aktualne').on('value', snap => { 
+                if(snap.val()) { 
+                    statusySal = snap.val(); 
+                    odswiezWidokLive(); 
+                } 
+            });
+            // Częstsze odświeżanie minut (co 10 sekund)
+            setInterval(aktualizujLicznikiCzasu, 10000);
         }
 
         function obliczAktywneWydania(logi) {
@@ -372,6 +387,50 @@
             });
         }
 
+        // FUNKCJA MODALA HISTORII
+        window.pokazHistorieSali = function(nrSali) {
+            document.getElementById('modal-sala-nr').innerText = nrSali;
+            const listaEl = document.getElementById('modal-historia-lista');
+            listaEl.innerHTML = '';
+
+            const dzisiaj = new Date();
+            const rok = dzisiaj.getFullYear();
+            const mc = String(dzisiaj.getMonth() + 1).padStart(2, '0');
+            const dzien = String(dzisiaj.getDate()).padStart(2, '0');
+            const dataStr = `${rok}-${mc}-${dzien}`;
+
+            const logiDzisiaj = wszystkieLogi.filter(l => l.sala === nrSali && l.czas.startsWith(dataStr));
+
+            if (logiDzisiaj.length === 0) {
+                listaEl.innerHTML = '<p class="text-sm text-zinc-500 italic text-center py-4">Brak aktywności w dniu dzisiejszym.</p>';
+            } else {
+                logiDzisiaj.forEach(l => {
+                    const godzina = l.czas.split(' ')[1].substring(0, 5);
+                    const kolor = l.akcja === 'ZAJĘTA' ? 'text-rose-400' : 'text-emerald-400';
+                    const znak = l.akcja === 'ZAJĘTA' ? '🔑 Wydana (Zajęta)' : '✅ Zwrócona (Wolna)';
+                    
+                    listaEl.innerHTML += `
+                        <div class="flex justify-between items-center bg-zinc-800/50 p-3 rounded-lg border border-zinc-700/50 shrink-0">
+                            <span class="font-bold text-zinc-300 text-lg">${godzina}</span>
+                            <span class="text-xs font-bold uppercase ${kolor}">${znak}</span>
+                        </div>
+                    `;
+                });
+                // Autoscroll na dół by pokazać najnowsze logi
+                setTimeout(() => listaEl.scrollTop = listaEl.scrollHeight, 50);
+            }
+
+            const modal = document.getElementById('modal-historia');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        window.zamknijHistorieSali = function() {
+            const modal = document.getElementById('modal-historia');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
         function odswiezWidokLive() {
             const container = document.getElementById('live-container');
             container.innerHTML = '';
@@ -379,9 +438,10 @@
                 const sekcja = document.createElement('div');
                 let html = '';
                 grupa.sale.forEach(sala => {
+                    // Dodany onclick do otwierania modala
                     if (statusySal[sala] === 'ZAJĘTA') {
                         const start = aktywneWydania[sala]; 
-                        let od = "Brak logu", tr = "???"; // Bezpiecznik jeśli ktoś wyczyścił bazę historii
+                        let od = "-", tr = "???"; 
                         
                         if (start && start > 0) { 
                             const d = new Date(start); 
@@ -390,14 +450,21 @@
                             if(minuty < 0) minuty = 0;
                             tr = `${minuty} min`; 
                         }
-                        html += `<div class="flex flex-col items-center justify-center p-2 sm:p-3 rounded-xl bg-rose-500/15 border border-rose-500/40 text-rose-400 shadow-md"><span class="font-bold text-lg sm:text-xl">${sala}</span><span class="text-[9px] sm:text-[10px] font-bold bg-rose-500/20 px-1.5 sm:px-2 rounded my-1 text-center">Od: ${od}</span><span class="text-[10px] sm:text-xs font-bold czas-trwania text-center" data-start="${start||''}">Trwa: ${tr}</span></div>`;
+                        html += `<div onclick="pokazHistorieSali('${sala}')" title="Kliknij, aby zobaczyć historię z dziś" class="cursor-pointer transition-transform hover:-translate-y-1 hover:shadow-rose-500/20 flex flex-col items-center justify-center p-2 sm:p-3 rounded-xl bg-rose-500/15 border border-rose-500/40 text-rose-400 shadow-md">
+                            <span class="font-bold text-lg sm:text-xl">${sala}</span>
+                            <span class="text-[9px] sm:text-[10px] font-bold bg-rose-500/20 px-1.5 sm:px-2 rounded my-1 text-center">Od: ${od}</span>
+                            <span class="text-[10px] sm:text-xs font-bold czas-trwania text-center" data-start="${start||''}">Trwa: ${tr}</span>
+                        </div>`;
                     } else {
-                        html += `<div class="flex flex-col items-center justify-center h-full min-h-[4.5rem] sm:min-h-[5.5rem] rounded-xl bg-[#064e3b] border border-[#065f46] text-[#34d399] shadow-md opacity-90"><span class="font-bold text-lg sm:text-xl">${sala}</span></div>`;
+                        html += `<div onclick="pokazHistorieSali('${sala}')" title="Kliknij, aby zobaczyć historię z dziś" class="cursor-pointer transition-transform hover:-translate-y-1 hover:shadow-emerald-500/20 flex flex-col items-center justify-center h-full min-h-[4.5rem] sm:min-h-[5.5rem] rounded-xl bg-[#064e3b] border border-[#065f46] text-[#34d399] shadow-md opacity-90">
+                            <span class="font-bold text-lg sm:text-xl">${sala}</span>
+                        </div>`;
                     }
                 });
                 sekcja.innerHTML = `<div class="mb-4"><h3 class="text-sm sm:text-md font-bold text-${grupa.kolor}-400 border-b border-zinc-800 pb-2 uppercase tracking-wide">${grupa.nazwa}</h3><div class="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-10 gap-2 sm:gap-3 mt-3">${html}</div></div>`;
                 container.appendChild(sekcja);
             });
+            aktualizujLicznikiCzasu(); // Natychmiastowa aktualizacja czasu po załadowaniu
         }
 
         function aktualizujLicznikiCzasu() { 
