@@ -2,7 +2,15 @@
 <html lang="pl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    
+    <!-- TAGI PWA DLA SMARTFONÓW (APLIKACJA NATIVE-LIKE) -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Admin POSM">
+    <meta name="mobile-web-app-capable" content="yes">
+    <link rel="apple-touch-icon" href="logo.png">
+
     <title>Centrum Dowodzenia - POSM</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
@@ -16,7 +24,18 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         
-        body { font-family: 'Inter', sans-serif; background-color: #09090b; background-image: radial-gradient(circle at 0% 0%, rgba(99, 102, 241, 0.05), transparent 40%), radial-gradient(circle at 100% 100%, rgba(236, 72, 153, 0.05), transparent 40%); background-attachment: fixed; color: #f4f4f5; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #09090b; 
+            background-image: radial-gradient(circle at 0% 0%, rgba(99, 102, 241, 0.05), transparent 40%), radial-gradient(circle at 100% 100%, rgba(236, 72, 153, 0.05), transparent 40%); 
+            background-attachment: fixed; 
+            color: #f4f4f5;
+            -webkit-user-select: none; /* Blokada zaznaczania na telefonie */
+            user-select: none;
+            -webkit-touch-callout: none;
+        }
+        input, textarea { -webkit-user-select: text; user-select: text; }
+
         .glass-panel { background: rgba(24, 24, 27, 0.7); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 20px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4); }
         .ekran { transition: opacity 0.4s ease, transform 0.4s ease; }
         .ukryty { opacity: 0; pointer-events: none; position: absolute; transform: scale(0.98); z-index: -1; }
@@ -44,11 +63,15 @@
     <!-- EKRAN LOGOWANIA -->
     <div id="ekran-logowania" class="ekran widoczny w-full max-w-md mt-20">
         <div class="glass-panel p-8 text-center relative overflow-hidden">
+            <img src="logo.png" alt="Logo" class="w-20 h-20 mx-auto mb-4 object-contain" onerror="this.style.display='none'">
             <h1 class="text-2xl font-bold mb-1 tracking-tight">Panel Dyrekcji</h1>
-            <input type="email" id="pole-email" class="w-full bg-zinc-900/60 border border-zinc-700 text-white rounded-xl px-4 py-3 mt-6 focus:border-indigo-500 outline-none text-center" placeholder="Adres e-mail...">
-            <input type="password" id="pole-hasla" class="w-full bg-zinc-900/60 border border-zinc-700 text-white rounded-xl px-4 py-3 mb-4 mt-4 focus:border-indigo-500 outline-none text-center" placeholder="Hasło...">
-            <p id="komunikat-bledu" class="text-red-400 text-sm mb-4 hidden font-medium">Błędny e-mail lub hasło!</p>
-            <button onclick="zaloguj()" class="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold py-3 rounded-xl hover:scale-[1.02] transition-transform">Zaloguj się</button>
+            <p class="text-sm text-zinc-400 mb-6">Autoryzacja Firebase</p>
+            
+            <!-- Ukryliśmy pole Email dla wygody, prosi tylko o hasło -->
+            <input type="password" id="pole-hasla" class="w-full bg-zinc-900/60 border border-zinc-700 text-white rounded-xl px-4 py-4 mb-4 mt-4 focus:border-indigo-500 outline-none text-center text-xl tracking-widest" placeholder="Hasło / PIN...">
+            
+            <p id="komunikat-bledu" class="text-red-400 text-sm mb-4 hidden font-medium">Błędne hasło dostępu!</p>
+            <button onclick="zaloguj()" class="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold py-4 rounded-xl hover:scale-[1.02] transition-transform shadow-lg shadow-indigo-500/20">Odblokuj Panel</button>
         </div>
     </div>
 
@@ -58,18 +81,18 @@
         <nav class="glass-panel px-6 py-4 flex justify-between items-center">
             <div class="flex items-center gap-6">
                 <div class="flex items-center gap-3 mr-4">
-                    <div class="relative w-16 h-16 rounded-xl flex items-center justify-center overflow-hidden bg-white/5 border border-white/10">
+                    <div class="relative w-16 h-16 rounded-xl flex items-center justify-center overflow-hidden bg-white/5 border border-white/10 hidden sm:flex">
                         <img src="logo.png" alt="Logo" class="w-full h-full object-cover z-10" onerror="this.style.display='none'">
                     </div>
                     <div><h1 class="text-xl font-bold tracking-tight">Centrum Dowodzenia</h1></div>
                 </div>
-                <div class="flex gap-4">
-                    <button onclick="zmienZakladke('statystyki')" id="btn-tab-statystyki" class="tab-btn active pb-1 text-sm tracking-wide uppercase">Analityka i Wykresy</button>
-                    <button onclick="zmienZakladke('podglad')" id="btn-tab-podglad" class="tab-btn pb-1 text-sm tracking-wide uppercase">Stan Sal na Żywo</button>
-                    <button onclick="zmienZakladke('narzedzia')" id="btn-tab-narzedzia" class="tab-btn pb-1 text-sm tracking-wide uppercase text-indigo-400">Narzędzia</button>
+                <div class="flex gap-4 overflow-x-auto no-scrollbar">
+                    <button onclick="zmienZakladke('statystyki')" id="btn-tab-statystyki" class="tab-btn active pb-1 text-sm tracking-wide uppercase whitespace-nowrap">Analityka i Wykresy</button>
+                    <button onclick="zmienZakladke('podglad')" id="btn-tab-podglad" class="tab-btn pb-1 text-sm tracking-wide uppercase whitespace-nowrap">Stan Sal na Żywo</button>
+                    <button onclick="zmienZakladke('narzedzia')" id="btn-tab-narzedzia" class="tab-btn pb-1 text-sm tracking-wide uppercase text-indigo-400 whitespace-nowrap">Narzędzia</button>
                 </div>
             </div>
-            <button onclick="wyloguj()" class="text-zinc-400 hover:text-white bg-zinc-800/50 px-4 py-2 rounded-lg text-sm border border-zinc-700">Wyloguj</button>
+            <button onclick="wyloguj()" class="hidden sm:block text-zinc-400 hover:text-white bg-zinc-800/50 px-4 py-2 rounded-lg text-sm border border-zinc-700">Wyloguj</button>
         </nav>
 
         <!-- ZAKŁADKA 1: STATYSTYKI -->
@@ -171,9 +194,9 @@
                     </div>
                     <div class="w-full flex flex-col pt-2 pb-6 px-4 bg-zinc-900/80 rounded-xl border border-zinc-800 shadow-inner overflow-x-auto">
                         
-                        <div id="heatmap-godziny" class="flex pl-28 mb-2"></div>
+                        <div id="heatmap-godziny" class="flex pl-28 mb-2 min-w-[600px]"></div>
                         
-                        <div class="flex w-full relative">
+                        <div class="flex w-full relative min-w-[600px]">
                             <div id="heatmap-dni" class="w-28 flex flex-col justify-around text-xs font-bold text-zinc-400 border-r border-zinc-800 pr-4 py-2"></div>
                             
                             <div class="flex-grow relative overflow-hidden ml-2 h-[500px]">
@@ -204,13 +227,13 @@
 
         <!-- ZAKŁADKA 3: NARZĘDZIA -->
         <div id="zakladka-narzedzia" class="hidden flex-col gap-6 h-full">
-            <div class="glass-panel p-6 max-w-xl flex flex-col gap-4 border-t-2 border-t-indigo-500">
+            <div class="glass-panel p-6 max-w-xl flex flex-col gap-4 border-t-2 border-t-indigo-500 mx-auto w-full">
                 <h2 class="text-xl font-bold mb-2">Generator Raportów PDF</h2>
                 <p class="text-sm text-zinc-400 mb-4">Wygeneruj oficjalny, podsumowujący raport na dany miesiąc.</p>
-                <div><label class="block text-xs font-bold text-zinc-400 uppercase mb-1">Miesiąc raportu</label><input type="month" id="pdf-miesiac" class="w-full bg-zinc-900 border border-zinc-700 text-white rounded-lg px-4 py-2 focus:border-indigo-500 outline-none date-input"></div>
-                <div><label class="block text-xs font-bold text-zinc-400 uppercase mb-1">Sporządził(a)</label><input type="text" id="pdf-autor" placeholder="Imię i nazwisko" class="w-full bg-zinc-900 border border-zinc-700 text-white rounded-lg px-4 py-2 focus:border-indigo-500 outline-none"></div>
-                <div><label class="block text-xs font-bold text-zinc-400 uppercase mb-1">Krótki komentarz</label><textarea id="pdf-komentarz" rows="2" class="w-full bg-zinc-900 border border-zinc-700 text-white rounded-lg px-4 py-2 focus:border-indigo-500 outline-none resize-none"></textarea></div>
-                <button id="btn-generuj-pdf" onclick="generujPDF()" class="mt-4 w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-xl transition-colors shadow-lg shadow-indigo-500/20">Wygeneruj i Pobierz PDF</button>
+                <div><label class="block text-xs font-bold text-zinc-400 uppercase mb-1">Miesiąc raportu</label><input type="month" id="pdf-miesiac" class="w-full bg-zinc-900 border border-zinc-700 text-white rounded-lg px-4 py-3 focus:border-indigo-500 outline-none date-input"></div>
+                <div><label class="block text-xs font-bold text-zinc-400 uppercase mb-1">Sporządził(a)</label><input type="text" id="pdf-autor" placeholder="Imię i nazwisko" class="w-full bg-zinc-900 border border-zinc-700 text-white rounded-lg px-4 py-3 focus:border-indigo-500 outline-none"></div>
+                <div><label class="block text-xs font-bold text-zinc-400 uppercase mb-1">Krótki komentarz</label><textarea id="pdf-komentarz" rows="2" class="w-full bg-zinc-900 border border-zinc-700 text-white rounded-lg px-4 py-3 focus:border-indigo-500 outline-none resize-none"></textarea></div>
+                <button id="btn-generuj-pdf" onclick="generujPDF()" class="mt-4 w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-4 rounded-xl transition-colors shadow-lg shadow-indigo-500/20">Wygeneruj i Pobierz PDF</button>
             </div>
         </div>
     </div>
@@ -278,10 +301,10 @@
         const daneWykresow = { 1: {}, 2: {}, 3: {}, 4: {} };
 
         document.getElementById("pole-hasla").addEventListener("keypress", e => { if (e.key === "Enter") zaloguj(); });
-        document.getElementById("pole-email").addEventListener("keypress", e => { if (e.key === "Enter") zaloguj(); });
 
         function zaloguj() {
-            const email = document.getElementById('pole-email').value;
+            // TUTAJ WPISUJESZ SWÓJ MAIL STWORZONY W FIREBASE AUTH
+            const email = "admin@posm.pl"; 
             const haslo = document.getElementById('pole-hasla').value;
             
             firebase.auth().signInWithEmailAndPassword(email, haslo)
@@ -302,7 +325,6 @@
             });
         }
 
-        // Sprawdzenie czy ktoś już jest zalogowany po odświeżeniu strony
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
                 document.getElementById('ekran-logowania').classList.replace('widoczny', 'ukryty');
@@ -321,6 +343,13 @@
             });
         }
 
+        // PANCERNA FUNKCJA DO PARSOWANIA CZASU (ROZWIĄZUJE BŁĄD "-" NA IPHONE/SAFARI)
+        function parsowacCzas(czasStr) {
+            const p = czasStr.split(/[- :]/);
+            if(p.length === 6) return new Date(p[0], p[1]-1, p[2], p[3], p[4], p[5]).getTime();
+            return new Date(czasStr.replace(' ', 'T')).getTime();
+        }
+
         function uruchomSystem() {
             db.ref('statystyki_logi').on('value', snap => {
                 if(snap.val()) { 
@@ -337,7 +366,7 @@
         function obliczAktywneWydania(logi) {
             aktywneWydania = {};
             logi.forEach(log => {
-                if (log.akcja === 'ZAJĘTA') aktywneWydania[log.sala] = new Date(log.czas.replace(' ', 'T')).getTime();
+                if (log.akcja === 'ZAJĘTA') aktywneWydania[log.sala] = parsowacCzas(log.czas);
                 else if (log.akcja === 'WOLNA') delete aktywneWydania[log.sala];
             });
         }
@@ -350,7 +379,9 @@
                 let html = '';
                 grupa.sale.forEach(sala => {
                     if (statusySal[sala] === 'ZAJĘTA') {
-                        const start = aktywneWydania[sala]; let od = "-", tr = "- min";
+                        const start = aktywneWydania[sala]; 
+                        let od = "Brak logu", tr = "???"; // Bezpiecznik jeśli ktoś wyczyścił bazę
+                        
                         if (start && start > 0) { 
                             const d = new Date(start); 
                             od = `${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`; 
@@ -424,7 +455,8 @@
             let mW = {};
             aktualnieFiltrowaneLogi.forEach(log => {
                 if (log.akcja === 'ZAJĘTA') {
-                    let d = new Date(new Date(log.czas.replace(' ', 'T')).getTime());
+                    let ms = parsowacCzas(log.czas);
+                    let d = new Date(ms);
                     let min = Math.floor(d.getMinutes() / gran) * gran;
                     let strG = d.getHours().toString().padStart(2, '0') + ":" + min.toString().padStart(2, '0');
                     mW[strG] = (mW[strG] || 0) + 1;
@@ -444,13 +476,13 @@
             const gran = parseInt(document.getElementById('granulacja-czasu').value);
 
             dane.forEach(log => {
-                let ms = new Date(log.czas.replace(' ', 'T')).getTime();
+                let ms = parsowacCzas(log.czas);
                 if (log.akcja === 'ZAJĘTA') {
                     saleWydania[log.sala] = (saleWydania[log.sala] || 0) + 1;
                     let dObj = new Date(ms); let min = Math.floor(dObj.getMinutes() / gran) * gran;
                     let strG = dObj.getHours().toString().padStart(2, '0') + ":" + min.toString().padStart(2, '0');
                     minutyWydania[strG] = (minutyWydania[strG] || 0) + 1;
-                    try { dniWydania[nazwyDni[new Date(ms).getDay()]]++; } catch(e) {}
+                    try { dniWydania[nazwyDni[dObj.getDay()]]++; } catch(e) {}
                     sesjeBiezace[log.sala] = ms;
                 } else if (log.akcja === 'WOLNA') {
                     if(sesjeBiezace[log.sala]) {
@@ -564,7 +596,8 @@
             let maxVal = 0;
             logi.forEach(l => {
                 if(l.akcja === 'ZAJĘTA') {
-                    const dObj = new Date(l.czas.replace(' ', 'T'));
+                    const ms = parsowacCzas(l.czas);
+                    const dObj = new Date(ms);
                     const dayIdx = dObj.getDay() === 0 ? 6 : dObj.getDay() - 1; 
                     if(dayIdx >= 0 && dayIdx <= 6) {
                         const h = dObj.getHours();
@@ -647,7 +680,7 @@
                 let totalMins = 0;
 
                 lPdf.forEach(l => {
-                    let ms = new Date(l.czas.replace(' ','T')).getTime();
+                    let ms = parsowacCzas(l.czas);
                     if (l.akcja === 'ZAJĘTA') {
                         sW[l.sala] = (sW[l.sala]||0)+1;
                         const d = new Date(ms); let min = Math.floor(d.getMinutes()/15)*15;
