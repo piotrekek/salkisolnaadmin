@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     
-    <!-- TAGI PWA DLA SMARTFONÓW (APLIKACJA NATIVE-LIKE) -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Admin POSM">
@@ -30,9 +29,7 @@
             background-image: radial-gradient(circle at 0% 0%, rgba(99, 102, 241, 0.05), transparent 40%), radial-gradient(circle at 100% 100%, rgba(236, 72, 153, 0.05), transparent 40%); 
             background-attachment: fixed; 
             color: #f4f4f5;
-            -webkit-user-select: none; /* Blokada zaznaczania na telefonie */
-            user-select: none;
-            -webkit-touch-callout: none;
+            -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
         }
         input, textarea { -webkit-user-select: text; user-select: text; }
 
@@ -40,7 +37,8 @@
         .ekran { transition: opacity 0.4s ease, transform 0.4s ease; }
         .ukryty { opacity: 0; pointer-events: none; position: absolute; transform: scale(0.98); z-index: -1; }
         .widoczny { opacity: 1; transform: scale(1); position: relative; z-index: 10; }
-        ::-webkit-scrollbar { width: 6px; height: 6px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 10px; }
+        .no-scrollbar::-webkit-scrollbar { display: none; } .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
         .btn-wykres { background: rgba(255,255,255,0.05); padding: 4px 12px; border-radius: 8px; transition: all 0.2s; }
         .btn-wykres:hover { background: rgba(255,255,255,0.15); transform: scale(1.05); }
         .filtr-btn { padding: 8px 16px; border-radius: 12px; font-size: 0.875rem; font-weight: 600; transition: all 0.2s; background: rgba(255,255,255,0.05); color: #a1a1aa; border: 1px solid rgba(255,255,255,0.05); white-space: nowrap; cursor: pointer; }
@@ -58,127 +56,128 @@
         .pdf-table th { background-color: #f4f4f5; font-weight: bold; }
     </style>
 </head>
-<body class="min-h-screen flex flex-col items-center p-4">
+<body class="min-h-screen flex flex-col items-center p-2 sm:p-4 pt-[env(safe-area-inset-top)]">
 
     <!-- EKRAN LOGOWANIA -->
-    <div id="ekran-logowania" class="ekran widoczny w-full max-w-md mt-20">
-        <div class="glass-panel p-8 text-center relative overflow-hidden">
-            <img src="logo.png" alt="Logo" class="w-20 h-20 mx-auto mb-4 object-contain" onerror="this.style.display='none'">
-            <h1 class="text-2xl font-bold mb-1 tracking-tight">Panel Dyrekcji</h1>
-            <p class="text-sm text-zinc-400 mb-6">Autoryzacja Firebase</p>
+    <div id="ekran-logowania" class="ekran widoczny w-full max-w-md mt-10 sm:mt-20">
+        <div class="glass-panel p-6 sm:p-8 text-center relative overflow-hidden mx-2 sm:mx-0">
+            <img src="logo.png" alt="Logo" class="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-4 object-contain" onerror="this.style.display='none'">
+            <h1 class="text-xl sm:text-2xl font-bold mb-1 tracking-tight">Panel Dyrekcji</h1>
+            <p class="text-xs sm:text-sm text-zinc-400 mb-6">Autoryzacja Firebase</p>
             
-            <!-- Ukryliśmy pole Email dla wygody, prosi tylko o hasło -->
-            <input type="password" id="pole-hasla" class="w-full bg-zinc-900/60 border border-zinc-700 text-white rounded-xl px-4 py-4 mb-4 mt-4 focus:border-indigo-500 outline-none text-center text-xl tracking-widest" placeholder="Hasło / PIN...">
+            <input type="password" id="pole-hasla" class="w-full bg-zinc-900/60 border border-zinc-700 text-white rounded-xl px-4 py-3 sm:py-4 mb-4 focus:border-indigo-500 outline-none text-center text-lg sm:text-xl tracking-widest" placeholder="Hasło / PIN...">
             
             <p id="komunikat-bledu" class="text-red-400 text-sm mb-4 hidden font-medium">Błędne hasło dostępu!</p>
-            <button onclick="zaloguj()" class="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold py-4 rounded-xl hover:scale-[1.02] transition-transform shadow-lg shadow-indigo-500/20">Odblokuj Panel</button>
+            <button onclick="zaloguj()" class="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold py-3 sm:py-4 rounded-xl hover:scale-[1.02] transition-transform shadow-lg shadow-indigo-500/20">Odblokuj Panel</button>
         </div>
     </div>
 
     <!-- EKRAN DASHBOARDU -->
-    <div id="ekran-dashboardu" class="ekran ukryty w-full max-w-[1400px] flex flex-col gap-5 py-4">
+    <div id="ekran-dashboardu" class="ekran ukryty w-full max-w-[1400px] flex flex-col gap-4 sm:gap-5 pb-8">
         
-        <nav class="glass-panel px-6 py-4 flex justify-between items-center">
-            <div class="flex items-center gap-6">
-                <div class="flex items-center gap-3 mr-4">
-                    <div class="relative w-16 h-16 rounded-xl flex items-center justify-center overflow-hidden bg-white/5 border border-white/10 hidden sm:flex">
+        <nav class="glass-panel px-4 sm:px-6 py-3 sm:py-4 flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-0">
+            <div class="flex w-full justify-between items-center sm:w-auto">
+                <div class="flex items-center gap-3">
+                    <div class="relative w-10 h-10 sm:w-16 sm:h-16 rounded-xl flex items-center justify-center overflow-hidden bg-white/5 border border-white/10">
                         <img src="logo.png" alt="Logo" class="w-full h-full object-cover z-10" onerror="this.style.display='none'">
                     </div>
-                    <div><h1 class="text-xl font-bold tracking-tight">Centrum Dowodzenia</h1></div>
+                    <div><h1 class="text-lg sm:text-xl font-bold tracking-tight">Centrum Dowodzenia</h1></div>
                 </div>
-                <div class="flex gap-4 overflow-x-auto no-scrollbar">
-                    <button onclick="zmienZakladke('statystyki')" id="btn-tab-statystyki" class="tab-btn active pb-1 text-sm tracking-wide uppercase whitespace-nowrap">Analityka i Wykresy</button>
-                    <button onclick="zmienZakladke('podglad')" id="btn-tab-podglad" class="tab-btn pb-1 text-sm tracking-wide uppercase whitespace-nowrap">Stan Sal na Żywo</button>
-                    <button onclick="zmienZakladke('narzedzia')" id="btn-tab-narzedzia" class="tab-btn pb-1 text-sm tracking-wide uppercase text-indigo-400 whitespace-nowrap">Narzędzia</button>
-                </div>
+                <!-- Przycisk wyloguj dla telefonów (ukryty na PC) -->
+                <button onclick="wyloguj()" class="sm:hidden text-zinc-400 hover:text-white bg-zinc-800/50 px-3 py-1.5 rounded-lg text-xs font-bold border border-zinc-700">Wyloguj</button>
             </div>
+            
+            <!-- Zakładki przewijane na boki na telefonie -->
+            <div class="flex gap-4 overflow-x-auto no-scrollbar w-full sm:w-auto pb-1 items-center">
+                <button onclick="zmienZakladke('statystyki')" id="btn-tab-statystyki" class="tab-btn active pb-1 text-xs sm:text-sm tracking-wide uppercase whitespace-nowrap shrink-0">Analityka i Wykresy</button>
+                <button onclick="zmienZakladke('podglad')" id="btn-tab-podglad" class="tab-btn pb-1 text-xs sm:text-sm tracking-wide uppercase whitespace-nowrap shrink-0">Stan Sal na Żywo</button>
+                <button onclick="zmienZakladke('narzedzia')" id="btn-tab-narzedzia" class="tab-btn pb-1 text-xs sm:text-sm tracking-wide uppercase text-indigo-400 whitespace-nowrap shrink-0">Narzędzia</button>
+            </div>
+
+            <!-- Przycisk wyloguj dla PC -->
             <button onclick="wyloguj()" class="hidden sm:block text-zinc-400 hover:text-white bg-zinc-800/50 px-4 py-2 rounded-lg text-sm border border-zinc-700">Wyloguj</button>
         </nav>
 
         <!-- ZAKŁADKA 1: STATYSTYKI -->
-        <div id="zakladka-statystyki" class="flex flex-col gap-5">
+        <div id="zakladka-statystyki" class="flex flex-col gap-4 sm:gap-5">
             
-            <div class="glass-panel px-6 py-3 flex items-center gap-3 overflow-x-auto no-scrollbar">
-                <span class="text-xs font-bold text-zinc-500 uppercase tracking-widest mr-2">Okres:</span>
-                <button onclick="ustawTrybFiltru('all')" id="btn-all" class="filtr-btn active">Cała historia</button>
-                <button onclick="ustawTrybFiltru('day')" id="btn-day" class="filtr-btn">Dzień</button>
-                <button onclick="ustawTrybFiltru('week')" id="btn-week" class="filtr-btn">Tydzień</button>
-                <button onclick="ustawTrybFiltru('month')" id="btn-month" class="filtr-btn">Miesiąc</button>
-                <button onclick="ustawTrybFiltru('year')" id="btn-year" class="filtr-btn">Rok</button>
-                <button onclick="ustawTrybFiltru('range')" id="btn-range" class="filtr-btn">Okres</button>
+            <!-- Filtry kalendarza -->
+            <div class="glass-panel px-4 sm:px-6 py-3 flex items-center gap-3 overflow-x-auto no-scrollbar">
+                <span class="text-xs font-bold text-zinc-500 uppercase tracking-widest shrink-0">Okres:</span>
+                <button onclick="ustawTrybFiltru('all')" id="btn-all" class="filtr-btn active shrink-0">Cała historia</button>
+                <button onclick="ustawTrybFiltru('day')" id="btn-day" class="filtr-btn shrink-0">Dzień</button>
+                <button onclick="ustawTrybFiltru('week')" id="btn-week" class="filtr-btn shrink-0">Tydzień</button>
+                <button onclick="ustawTrybFiltru('month')" id="btn-month" class="filtr-btn shrink-0">Miesiąc</button>
+                <button onclick="ustawTrybFiltru('year')" id="btn-year" class="filtr-btn shrink-0">Rok</button>
+                <button onclick="ustawTrybFiltru('range')" id="btn-range" class="filtr-btn shrink-0 mr-4">Okres</button>
                 
-                <div class="flex items-center gap-2 ml-auto min-w-[200px] justify-end">
+                <div class="flex items-center gap-2 ml-auto shrink-0">
                     <input type="date" id="in-day" onchange="zastosujFiltry()" class="date-input hidden">
                     <input type="week" id="in-week" onchange="zastosujFiltry()" class="date-input hidden">
                     <input type="month" id="in-month" onchange="zastosujFiltry()" class="date-input hidden">
                     <input type="number" id="in-year" min="2020" max="2050" placeholder="Rok np. 2026" onchange="zastosujFiltry()" class="date-input hidden w-24 text-center">
                     
                     <div id="in-range" class="hidden items-center gap-2">
-                        <span class="text-xs text-zinc-400">Od:</span><input type="date" id="range-start" onchange="zastosujFiltry()" class="date-input">
-                        <span class="text-xs text-zinc-400">Do:</span><input type="date" id="range-end" onchange="zastosujFiltry()" class="date-input">
+                        <span class="text-xs text-zinc-400">Od:</span><input type="date" id="range-start" onchange="zastosujFiltry()" class="date-input text-xs sm:text-sm">
+                        <span class="text-xs text-zinc-400">Do:</span><input type="date" id="range-end" onchange="zastosujFiltry()" class="date-input text-xs sm:text-sm">
                     </div>
                 </div>
             </div>
 
-            <div id="ekran-oczekiwania" class="hidden flex-col items-center justify-center py-24 glass-panel border-dashed border-2 border-zinc-700/50">
-                <h3 class="text-xl font-bold text-zinc-300">Wymagany wybór z kalendarza</h3>
-                <p class="text-sm text-zinc-500 mt-2">Wskaż datę na pasku, aby załadować statystyki.</p>
+            <div id="ekran-oczekiwania" class="hidden flex-col items-center justify-center py-20 glass-panel border-dashed border-2 border-zinc-700/50 mx-2 sm:mx-0 text-center px-4">
+                <h3 class="text-lg sm:text-xl font-bold text-zinc-300">Wymagany wybór daty</h3>
+                <p class="text-xs sm:text-sm text-zinc-500 mt-2">Wskaż datę na pasku wyżej, aby załadować statystyki.</p>
             </div>
 
-            <div id="kontener-danych" class="flex flex-col gap-5">
-                <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
-                    <div class="glass-panel p-4 border-t-2 border-t-indigo-500 flex flex-col items-center justify-center text-center"><p class="text-xs text-zinc-400 uppercase mb-1">Top Sala</p><p id="info-ulubiona" class="text-xl font-bold">-</p></div>
-                    <div class="glass-panel p-4 border-t-2 border-t-rose-500 flex flex-col items-center justify-center text-center"><p class="text-xs text-zinc-400 uppercase mb-1">Średni Czas Ćwiczeń</p><p id="info-sredni-czas" class="text-xl font-bold">-</p></div>
-                    <div class="glass-panel p-4 border-t-2 border-t-emerald-500 flex flex-col items-center justify-center text-center"><p class="text-xs text-zinc-400 uppercase mb-1">Szczyt (Minuty)</p><p id="info-godzina" class="text-xl font-bold">-</p></div>
-                    <div class="glass-panel p-4 border-t-2 border-t-amber-500 flex flex-col items-center justify-center text-center"><p class="text-xs text-zinc-400 uppercase mb-1">Najbardziej Aktywny Dzień</p><p id="info-dzien" class="text-xl font-bold">-</p></div>
-                    <div class="glass-panel p-4 border-t-2 border-t-cyan-500 flex flex-col items-center justify-center text-center"><p class="text-xs text-zinc-400 uppercase mb-1">Suma Wydań</p><p id="info-suma" class="text-xl font-bold">-</p></div>
+            <div id="kontener-danych" class="flex flex-col gap-4 sm:gap-5">
+                <div class="grid grid-cols-2 md:grid-cols-5 gap-3 sm:gap-4">
+                    <div class="glass-panel p-3 sm:p-4 border-t-2 border-t-indigo-500 flex flex-col items-center justify-center text-center"><p class="text-[10px] sm:text-xs text-zinc-400 uppercase mb-1">Top Sala</p><p id="info-ulubiona" class="text-lg sm:text-xl font-bold">-</p></div>
+                    <div class="glass-panel p-3 sm:p-4 border-t-2 border-t-rose-500 flex flex-col items-center justify-center text-center"><p class="text-[10px] sm:text-xs text-zinc-400 uppercase mb-1">Średni Czas</p><p id="info-sredni-czas" class="text-lg sm:text-xl font-bold">-</p></div>
+                    <div class="glass-panel p-3 sm:p-4 border-t-2 border-t-emerald-500 flex flex-col items-center justify-center text-center"><p class="text-[10px] sm:text-xs text-zinc-400 uppercase mb-1">Szczyt (Minuty)</p><p id="info-godzina" class="text-lg sm:text-xl font-bold">-</p></div>
+                    <div class="glass-panel p-3 sm:p-4 border-t-2 border-t-amber-500 flex flex-col items-center justify-center text-center"><p class="text-[10px] sm:text-xs text-zinc-400 uppercase mb-1">Top Dzień</p><p id="info-dzien" class="text-lg sm:text-xl font-bold">-</p></div>
+                    <div class="glass-panel p-3 sm:p-4 border-t-2 border-t-cyan-500 flex flex-col items-center justify-center text-center col-span-2 md:col-span-1"><p class="text-[10px] sm:text-xs text-zinc-400 uppercase mb-1">Suma Wydań</p><p id="info-suma" class="text-lg sm:text-xl font-bold">-</p></div>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div class="glass-panel p-5 flex flex-col h-[400px]">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+                    <div class="glass-panel p-4 sm:p-5 flex flex-col h-[300px] sm:h-[400px]">
                         <div class="flex justify-between items-center mb-3">
-                            <h2 class="text-md font-bold text-zinc-200">Ranking Sal</h2>
-                            <div class="flex items-center gap-2">
-                                <button onclick="toggleRankingMode()" id="btn-ranking-mode" class="text-[10px] uppercase font-bold bg-indigo-500/20 text-indigo-400 px-2 py-1 rounded mr-3">Aktualnie: Najczęstsze</button>
-                                <button onclick="zmienTyp(1, -1)" class="btn-wykres">&lsaquo;</button><span id="nazwa-typu-1" class="text-xs font-bold text-indigo-400 uppercase w-20 text-center">Słupkowy</span><button onclick="zmienTyp(1, 1)" class="btn-wykres">&rsaquo;</button>
-                                <button onclick="pobierz(1)" class="ml-2 text-zinc-400 hover:text-white" title="Pobierz"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg></button>
+                            <h2 class="text-sm sm:text-md font-bold text-zinc-200">Ranking Sal</h2>
+                            <div class="flex items-center gap-1 sm:gap-2">
+                                <button onclick="toggleRankingMode()" id="btn-ranking-mode" class="text-[9px] sm:text-[10px] uppercase font-bold bg-indigo-500/20 text-indigo-400 px-2 py-1 rounded mr-1 sm:mr-3">Aktualnie: Najczęstsze</button>
+                                <button onclick="zmienTyp(1, -1)" class="btn-wykres">&lsaquo;</button><span id="nazwa-typu-1" class="text-[10px] sm:text-xs font-bold text-indigo-400 uppercase w-16 sm:w-20 text-center">Słupkowy</span><button onclick="zmienTyp(1, 1)" class="btn-wykres">&rsaquo;</button>
                             </div>
                         </div>
                         <div class="relative flex-grow w-full bg-zinc-900/40 rounded-xl p-2 border border-zinc-800/50"><canvas id="wykres1"></canvas></div>
                     </div>
 
-                    <div class="glass-panel p-5 flex flex-col h-[400px]">
+                    <div class="glass-panel p-4 sm:p-5 flex flex-col h-[300px] sm:h-[400px]">
                         <div class="flex justify-between items-center mb-3">
-                            <h2 class="text-md font-bold text-zinc-200">Szczyty Aktywności</h2>
-                            <div class="flex items-center gap-2">
-                                <select id="granulacja-czasu" onchange="przeliczTylkoWykres2()" class="bg-zinc-800 text-xs text-zinc-300 px-2 py-1.5 rounded border border-zinc-700 outline-none mr-2">
-                                    <option value="5">Co 5 min</option><option value="15" selected>Co 15 min</option>
-                                    <option value="30">Co 30 min</option><option value="60">Co godzinę</option>
+                            <h2 class="text-sm sm:text-md font-bold text-zinc-200">Szczyty Aktywności</h2>
+                            <div class="flex items-center gap-1 sm:gap-2">
+                                <select id="granulacja-czasu" onchange="przeliczTylkoWykres2()" class="bg-zinc-800 text-[10px] sm:text-xs text-zinc-300 px-1 sm:px-2 py-1 sm:py-1.5 rounded border border-zinc-700 outline-none mr-1 sm:mr-2">
+                                    <option value="15" selected>15 min</option><option value="30">30 min</option><option value="60">1 godz</option>
                                 </select>
-                                <button onclick="zmienTyp(2, -1)" class="btn-wykres">&lsaquo;</button><span id="nazwa-typu-2" class="text-xs font-bold text-emerald-400 uppercase w-20 text-center">Liniowy</span><button onclick="zmienTyp(2, 1)" class="btn-wykres">&rsaquo;</button>
-                                <button onclick="pobierz(2)" class="ml-2 text-zinc-400 hover:text-white" title="Pobierz"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg></button>
+                                <button onclick="zmienTyp(2, -1)" class="btn-wykres">&lsaquo;</button><span id="nazwa-typu-2" class="text-[10px] sm:text-xs font-bold text-emerald-400 uppercase w-16 sm:w-20 text-center">Liniowy</span><button onclick="zmienTyp(2, 1)" class="btn-wykres">&rsaquo;</button>
                             </div>
                         </div>
                         <div class="relative flex-grow w-full bg-zinc-900/40 rounded-xl p-2 border border-zinc-800/50"><canvas id="wykres2"></canvas></div>
                     </div>
 
-                    <div class="glass-panel p-5 flex flex-col h-[400px]">
+                    <div class="glass-panel p-4 sm:p-5 flex flex-col h-[300px] sm:h-[400px]">
                         <div class="flex justify-between items-center mb-3">
-                            <h2 class="text-md font-bold text-zinc-200">Ruch wg Dni Tygodnia</h2>
-                            <div class="flex items-center gap-2">
-                                <button onclick="zmienTyp(3, -1)" class="btn-wykres">&lsaquo;</button><span id="nazwa-typu-3" class="text-xs font-bold text-amber-400 uppercase w-20 text-center">Kołowy</span><button onclick="zmienTyp(3, 1)" class="btn-wykres">&rsaquo;</button>
-                                <button onclick="pobierz(3)" class="ml-2 text-zinc-400 hover:text-white" title="Pobierz"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg></button>
+                            <h2 class="text-sm sm:text-md font-bold text-zinc-200">Ruch wg Dni</h2>
+                            <div class="flex items-center gap-1 sm:gap-2">
+                                <button onclick="zmienTyp(3, -1)" class="btn-wykres">&lsaquo;</button><span id="nazwa-typu-3" class="text-[10px] sm:text-xs font-bold text-amber-400 uppercase w-16 sm:w-20 text-center">Kołowy</span><button onclick="zmienTyp(3, 1)" class="btn-wykres">&rsaquo;</button>
                             </div>
                         </div>
                         <div class="relative flex-grow w-full bg-zinc-900/40 rounded-xl p-2 border border-zinc-800/50"><canvas id="wykres3"></canvas></div>
                     </div>
 
-                    <div class="glass-panel p-5 flex flex-col h-[400px]">
+                    <div class="glass-panel p-4 sm:p-5 flex flex-col h-[300px] sm:h-[400px]">
                         <div class="flex justify-between items-center mb-3">
-                            <h2 class="text-md font-bold text-zinc-200">Czas Wypożyczenia Salki</h2>
-                            <div class="flex items-center gap-2">
-                                <button onclick="zmienTyp(4, -1)" class="btn-wykres">&lsaquo;</button><span id="nazwa-typu-4" class="text-xs font-bold text-rose-400 uppercase w-20 text-center">Liniowy</span><button onclick="zmienTyp(4, 1)" class="btn-wykres">&rsaquo;</button>
-                                <button onclick="pobierz(4)" class="ml-2 text-zinc-400 hover:text-white" title="Pobierz"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg></button>
+                            <h2 class="text-sm sm:text-md font-bold text-zinc-200">Czas Wypożyczenia</h2>
+                            <div class="flex items-center gap-1 sm:gap-2">
+                                <button onclick="zmienTyp(4, -1)" class="btn-wykres">&lsaquo;</button><span id="nazwa-typu-4" class="text-[10px] sm:text-xs font-bold text-rose-400 uppercase w-16 sm:w-20 text-center">Liniowy</span><button onclick="zmienTyp(4, 1)" class="btn-wykres">&rsaquo;</button>
                             </div>
                         </div>
                         <div class="relative flex-grow w-full bg-zinc-900/40 rounded-xl p-2 border border-zinc-800/50"><canvas id="wykres4"></canvas></div>
@@ -186,28 +185,26 @@
                 </div>
 
                 <!-- MAPA CIEPLNA -->
-                <div class="glass-panel p-6 flex flex-col border-t-2 border-t-purple-500 mt-2">
+                <div class="glass-panel p-4 sm:p-6 flex flex-col border-t-2 border-t-purple-500 mt-2">
                     <div class="flex justify-between items-center mb-4">
-                        <div>
-                            <h2 class="text-xl font-bold">Mapa Gęstości Ruchu</h2>
-                        </div>
+                        <h2 class="text-lg sm:text-xl font-bold">Mapa Gęstości Ruchu</h2>
                     </div>
-                    <div class="w-full flex flex-col pt-2 pb-6 px-4 bg-zinc-900/80 rounded-xl border border-zinc-800 shadow-inner overflow-x-auto">
+                    <div class="w-full flex flex-col pt-2 pb-4 sm:pb-6 px-2 sm:px-4 bg-zinc-900/80 rounded-xl border border-zinc-800 shadow-inner overflow-x-auto">
                         
-                        <div id="heatmap-godziny" class="flex pl-28 mb-2 min-w-[600px]"></div>
+                        <div id="heatmap-godziny" class="flex pl-16 sm:pl-28 mb-2 min-w-[500px]"></div>
                         
-                        <div class="flex w-full relative min-w-[600px]">
-                            <div id="heatmap-dni" class="w-28 flex flex-col justify-around text-xs font-bold text-zinc-400 border-r border-zinc-800 pr-4 py-2"></div>
+                        <div class="flex w-full relative min-w-[500px]">
+                            <div id="heatmap-dni" class="w-16 sm:w-28 flex flex-col justify-around text-[10px] sm:text-xs font-bold text-zinc-400 border-r border-zinc-800 pr-2 sm:pr-4 py-2"></div>
                             
-                            <div class="flex-grow relative overflow-hidden ml-2 h-[500px]">
-                                <div id="heatmap-bg" class="absolute inset-0 grid" style="filter: blur(35px); transform: scale(1.15);"></div>
+                            <div class="flex-grow relative overflow-hidden ml-2 h-[350px] sm:h-[500px]">
+                                <div id="heatmap-bg" class="absolute inset-0 grid" style="filter: blur(25px); transform: scale(1.15);"></div>
                                 <div id="heatmap-overlay" class="absolute inset-0 grid pointer-events-none"></div>
                             </div>
                             
-                            <div class="w-20 flex flex-col items-center justify-between ml-6 py-4 border-l border-zinc-800 pl-4">
-                                <span class="text-[10px] font-bold text-rose-500 uppercase text-center leading-tight mb-2">Tłok<br>(Brak sal)</span>
-                                <div class="w-5 flex-grow rounded" style="background: linear-gradient(to top, rgb(34,197,94) 0%, rgb(234,179,8) 30%, rgb(249,115,22) 50%, rgb(239,68,68) 70%, rgb(127,29,29) 85%, rgb(0,0,0) 95%, rgb(0,0,0) 100%); border: 1px solid #3f3f46;"></div>
-                                <span class="text-[10px] font-bold text-emerald-500 uppercase text-center leading-tight mt-2">Wolne<br>sale</span>
+                            <div class="w-12 sm:w-20 flex flex-col items-center justify-between ml-2 sm:ml-6 py-4 border-l border-zinc-800 pl-2 sm:pl-4">
+                                <span class="text-[8px] sm:text-[10px] font-bold text-rose-500 uppercase text-center leading-tight mb-2">Tłok</span>
+                                <div class="w-3 sm:w-5 flex-grow rounded" style="background: linear-gradient(to top, rgb(34,197,94) 0%, rgb(234,179,8) 30%, rgb(249,115,22) 50%, rgb(239,68,68) 70%, rgb(127,29,29) 85%, rgb(0,0,0) 95%, rgb(0,0,0) 100%); border: 1px solid #3f3f46;"></div>
+                                <span class="text-[8px] sm:text-[10px] font-bold text-emerald-500 uppercase text-center leading-tight mt-2">Wolne</span>
                             </div>
                         </div>
                     </div>
@@ -217,23 +214,23 @@
         </div>
 
         <!-- ZAKŁADKA 2: PODGLĄD NA ŻYWO -->
-        <div id="zakladka-podglad" class="hidden flex-col gap-6 h-full">
-            <div class="glass-panel p-4 flex items-center justify-center gap-8">
-                <div class="flex items-center gap-2"><div class="w-4 h-4 rounded bg-[#064e3b] border border-[#065f46]"></div><span class="text-sm font-bold text-emerald-500 uppercase">Wolne</span></div>
-                <div class="flex items-center gap-2"><div class="w-4 h-4 rounded bg-rose-500/20 border border-rose-500/40"></div><span class="text-sm font-bold text-rose-400 uppercase">Zajęte</span></div>
+        <div id="zakladka-podglad" class="hidden flex-col gap-4 sm:gap-6 h-full">
+            <div class="glass-panel p-3 sm:p-4 flex items-center justify-center gap-6 sm:gap-8">
+                <div class="flex items-center gap-2"><div class="w-3 h-3 sm:w-4 sm:h-4 rounded bg-[#064e3b] border border-[#065f46]"></div><span class="text-xs sm:text-sm font-bold text-emerald-500 uppercase">Wolne</span></div>
+                <div class="flex items-center gap-2"><div class="w-3 h-3 sm:w-4 sm:h-4 rounded bg-rose-500/20 border border-rose-500/40"></div><span class="text-xs sm:text-sm font-bold text-rose-400 uppercase">Zajęte</span></div>
             </div>
-            <div id="live-container" class="glass-panel p-6 flex flex-col gap-6 max-h-[75vh] overflow-y-auto"></div>
+            <div id="live-container" class="glass-panel p-4 sm:p-6 flex flex-col gap-5 sm:gap-6 overflow-y-auto"></div>
         </div>
 
         <!-- ZAKŁADKA 3: NARZĘDZIA -->
-        <div id="zakladka-narzedzia" class="hidden flex-col gap-6 h-full">
-            <div class="glass-panel p-6 max-w-xl flex flex-col gap-4 border-t-2 border-t-indigo-500 mx-auto w-full">
-                <h2 class="text-xl font-bold mb-2">Generator Raportów PDF</h2>
-                <p class="text-sm text-zinc-400 mb-4">Wygeneruj oficjalny, podsumowujący raport na dany miesiąc.</p>
-                <div><label class="block text-xs font-bold text-zinc-400 uppercase mb-1">Miesiąc raportu</label><input type="month" id="pdf-miesiac" class="w-full bg-zinc-900 border border-zinc-700 text-white rounded-lg px-4 py-3 focus:border-indigo-500 outline-none date-input"></div>
-                <div><label class="block text-xs font-bold text-zinc-400 uppercase mb-1">Sporządził(a)</label><input type="text" id="pdf-autor" placeholder="Imię i nazwisko" class="w-full bg-zinc-900 border border-zinc-700 text-white rounded-lg px-4 py-3 focus:border-indigo-500 outline-none"></div>
-                <div><label class="block text-xs font-bold text-zinc-400 uppercase mb-1">Krótki komentarz</label><textarea id="pdf-komentarz" rows="2" class="w-full bg-zinc-900 border border-zinc-700 text-white rounded-lg px-4 py-3 focus:border-indigo-500 outline-none resize-none"></textarea></div>
-                <button id="btn-generuj-pdf" onclick="generujPDF()" class="mt-4 w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-4 rounded-xl transition-colors shadow-lg shadow-indigo-500/20">Wygeneruj i Pobierz PDF</button>
+        <div id="zakladka-narzedzia" class="hidden flex-col gap-4 sm:gap-6 h-full">
+            <div class="glass-panel p-5 sm:p-6 max-w-xl flex flex-col gap-4 border-t-2 border-t-indigo-500 mx-auto w-full">
+                <h2 class="text-lg sm:text-xl font-bold mb-1">Generator Raportów PDF</h2>
+                <p class="text-xs sm:text-sm text-zinc-400 mb-4">Wygeneruj oficjalny, podsumowujący raport na dany miesiąc.</p>
+                <div><label class="block text-[10px] sm:text-xs font-bold text-zinc-400 uppercase mb-1">Miesiąc raportu</label><input type="month" id="pdf-miesiac" class="w-full bg-zinc-900 border border-zinc-700 text-white rounded-lg px-3 py-2 sm:px-4 sm:py-3 focus:border-indigo-500 outline-none date-input"></div>
+                <div><label class="block text-[10px] sm:text-xs font-bold text-zinc-400 uppercase mb-1">Sporządził(a)</label><input type="text" id="pdf-autor" placeholder="Imię i nazwisko" class="w-full bg-zinc-900 border border-zinc-700 text-white rounded-lg px-3 py-2 sm:px-4 sm:py-3 focus:border-indigo-500 outline-none"></div>
+                <div><label class="block text-[10px] sm:text-xs font-bold text-zinc-400 uppercase mb-1">Krótki komentarz</label><textarea id="pdf-komentarz" rows="2" class="w-full bg-zinc-900 border border-zinc-700 text-white rounded-lg px-3 py-2 sm:px-4 sm:py-3 focus:border-indigo-500 outline-none resize-none"></textarea></div>
+                <button id="btn-generuj-pdf" onclick="generujPDF()" class="mt-2 w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 sm:py-4 rounded-xl transition-colors shadow-lg shadow-indigo-500/20 text-sm sm:text-base">Wygeneruj i Pobierz PDF</button>
             </div>
         </div>
     </div>
@@ -303,7 +300,7 @@
         document.getElementById("pole-hasla").addEventListener("keypress", e => { if (e.key === "Enter") zaloguj(); });
 
         function zaloguj() {
-            // TUTAJ WPISUJESZ SWÓJ MAIL STWORZONY W FIREBASE AUTH
+            // Logowanie na sztywno przypisanym e-mailem, dyrekcja wpisuje TYLKO hasło
             const email = "admin@posm.pl"; 
             const haslo = document.getElementById('pole-hasla').value;
             
@@ -325,11 +322,15 @@
             });
         }
 
+        // Firebase Auth pilnuje, by nikt nie ominął zabezpieczeń zbadaj elementem
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
                 document.getElementById('ekran-logowania').classList.replace('widoczny', 'ukryty');
                 document.getElementById('ekran-dashboardu').classList.replace('ukryty', 'widoczny');
                 uruchomSystem();
+            } else {
+                document.getElementById('ekran-logowania').classList.replace('ukryty', 'widoczny');
+                document.getElementById('ekran-dashboardu').classList.replace('widoczny', 'ukryty');
             }
         });
 
@@ -380,7 +381,7 @@
                 grupa.sale.forEach(sala => {
                     if (statusySal[sala] === 'ZAJĘTA') {
                         const start = aktywneWydania[sala]; 
-                        let od = "Brak logu", tr = "???"; // Bezpiecznik jeśli ktoś wyczyścił bazę
+                        let od = "Brak logu", tr = "???"; // Bezpiecznik jeśli ktoś wyczyścił bazę historii
                         
                         if (start && start > 0) { 
                             const d = new Date(start); 
@@ -389,12 +390,12 @@
                             if(minuty < 0) minuty = 0;
                             tr = `${minuty} min`; 
                         }
-                        html += `<div class="flex flex-col items-center justify-center p-3 rounded-xl bg-rose-500/15 border border-rose-500/40 text-rose-400 shadow-md"><span class="font-bold text-xl">${sala}</span><span class="text-[10px] font-bold bg-rose-500/20 px-2 rounded my-1">Od: ${od}</span><span class="text-xs font-bold czas-trwania" data-start="${start||''}">Trwa: ${tr}</span></div>`;
+                        html += `<div class="flex flex-col items-center justify-center p-2 sm:p-3 rounded-xl bg-rose-500/15 border border-rose-500/40 text-rose-400 shadow-md"><span class="font-bold text-lg sm:text-xl">${sala}</span><span class="text-[9px] sm:text-[10px] font-bold bg-rose-500/20 px-1.5 sm:px-2 rounded my-1 text-center">Od: ${od}</span><span class="text-[10px] sm:text-xs font-bold czas-trwania text-center" data-start="${start||''}">Trwa: ${tr}</span></div>`;
                     } else {
-                        html += `<div class="flex flex-col items-center justify-center h-full min-h-[5.5rem] rounded-xl bg-[#064e3b] border border-[#065f46] text-[#34d399] shadow-md opacity-90"><span class="font-bold text-xl">${sala}</span></div>`;
+                        html += `<div class="flex flex-col items-center justify-center h-full min-h-[4.5rem] sm:min-h-[5.5rem] rounded-xl bg-[#064e3b] border border-[#065f46] text-[#34d399] shadow-md opacity-90"><span class="font-bold text-lg sm:text-xl">${sala}</span></div>`;
                     }
                 });
-                sekcja.innerHTML = `<div class="mb-4"><h3 class="text-md font-bold text-${grupa.kolor}-400 border-b border-zinc-800 pb-2 uppercase tracking-wide">${grupa.nazwa}</h3><div class="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-10 gap-3 mt-3">${html}</div></div>`;
+                sekcja.innerHTML = `<div class="mb-4"><h3 class="text-sm sm:text-md font-bold text-${grupa.kolor}-400 border-b border-zinc-800 pb-2 uppercase tracking-wide">${grupa.nazwa}</h3><div class="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-10 gap-2 sm:gap-3 mt-3">${html}</div></div>`;
                 container.appendChild(sekcja);
             });
         }
@@ -413,7 +414,7 @@
         window.ustawTrybFiltru = function(tryb) {
             obecnyTryb = tryb;
             ['all', 'day', 'week', 'month', 'year', 'range'].forEach(f => {
-                document.getElementById(`btn-${f}`).className = f === tryb ? "filtr-btn active" : "filtr-btn";
+                document.getElementById(`btn-${f}`).className = f === tryb ? "filtr-btn active shrink-0" : "filtr-btn shrink-0";
                 const input = document.getElementById(`in-${f}`);
                 if(input) {
                     if (f === tryb && tryb !== 'all') { input.classList.remove('hidden'); input.classList.add(f === 'range' ? 'flex' : 'block'); } 
@@ -435,7 +436,7 @@
             let valid = true;
 
             if (obecnyTryb === 'day') { const val = document.getElementById('in-day').value; if(val) { nazwaOkresu = val; aktualnieFiltrowaneLogi = wszystkieLogi.filter(l => l.czas.startsWith(val)); } else valid = false; }
-            else if (obecnyTryb === 'week') { const val = document.getElementById('in-week').value; if(val) { nazwaOkresu = val; const {start, end} = wGetDate(val); aktualnieFiltrowaneLogi = wszystkieLogi.filter(l => { const d = new Date(l.czas.replace(' ', 'T')); return d >= start && d <= end; }); } else valid = false; }
+            else if (obecnyTryb === 'week') { const val = document.getElementById('in-week').value; if(val) { nazwaOkresu = val; const {start, end} = wGetDate(val); aktualnieFiltrowaneLogi = wszystkieLogi.filter(l => { const d = new Date(parsowacCzas(l.czas)); return d >= start && d <= end; }); } else valid = false; }
             else if (obecnyTryb === 'month') { const val = document.getElementById('in-month').value; if(val) { nazwaOkresu = val; aktualnieFiltrowaneLogi = wszystkieLogi.filter(l => l.czas.startsWith(val)); } else valid = false; }
             else if (obecnyTryb === 'year') { const val = document.getElementById('in-year').value; if(val) { nazwaOkresu = val; aktualnieFiltrowaneLogi = wszystkieLogi.filter(l => l.czas.startsWith(val)); } else valid = false; }
             else if (obecnyTryb === 'range') { const s = document.getElementById('range-start').value, e = document.getElementById('range-end').value; if(s && e) { nazwaOkresu = `${s}_do_${e}`; aktualnieFiltrowaneLogi = wszystkieLogi.filter(l => { const d = l.czas.substring(0, 10); return d >= s && d <= e; }); } else valid = false; }
@@ -455,8 +456,7 @@
             let mW = {};
             aktualnieFiltrowaneLogi.forEach(log => {
                 if (log.akcja === 'ZAJĘTA') {
-                    let ms = parsowacCzas(log.czas);
-                    let d = new Date(ms);
+                    let d = new Date(parsowacCzas(log.czas));
                     let min = Math.floor(d.getMinutes() / gran) * gran;
                     let strG = d.getHours().toString().padStart(2, '0') + ":" + min.toString().padStart(2, '0');
                     mW[strG] = (mW[strG] || 0) + 1;
